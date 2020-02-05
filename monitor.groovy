@@ -12,9 +12,7 @@ import javax.swing.*
 import javax.swing.event.*
 
 
-String apiCall(String request) {
-    String user = "admin"
-    String password = "admin"
+String apiCall(String request, String user, String password) {
     
     String auth = "Basic " + (user + ':' + password).bytes.encodeBase64();
     
@@ -73,7 +71,26 @@ void showFailed (String name, String url, def t) {
     }
 
 }
+
+public String getPassword() {        
+        Console console = System.console();
+        if (console == null) {
+            System.out.println("Couldn't get Console instance");
+            System.exit(0);
+        }
+
+        char[] passwordArray = console.readPassword("Password: ");
+		return (new String(passwordArray))
+    }
+
+if (this.args.size()!=2) {
+	println ("Usage: monitor.groovy jenkinsURL jenkinsUser")
+	System.exit(0)
+}
+	
 String jenkinsURL = this.args[0]
+String jenkinsUser = this.args[1]
+String jenkinsPassword = getPassword()
 
 def ts
 def allJobs
@@ -83,7 +100,7 @@ ts = java.lang.System.currentTimeMillis() - 7200000
 def jsonSlurper = new JsonSlurper()
 
 while (true) {
-    allJobs = jsonSlurper.parseText(apiCall(jenkinsURL + "/api/json?tree=jobs[name,displayName,url,color,lastBuild[number,duration,timestamp]]"))
+    allJobs = jsonSlurper.parseText(apiCall(jenkinsURL + "/api/json?tree=jobs[name,displayName,url,color,lastBuild[number,duration,timestamp]]", jenkinsUser, jenkinsPassword))
     failed = allJobs.jobs.findAll {it.color=="red" && (it.lastBuild.duration + it.lastBuild.timestamp >= ts)}
     println ("There are " + failed.size() + " recently (1hr) failed jobs")
     failed.each { 
