@@ -73,9 +73,7 @@ void showFailed (String name, String url, def t) {
     }
 
 }
-
-String host = "yourHost"
-String port = "yourPort"
+String jenkinsURL = this.args[0]
 
 def ts
 def allJobs
@@ -85,22 +83,13 @@ ts = java.lang.System.currentTimeMillis() - 7200000
 def jsonSlurper = new JsonSlurper()
 
 while (true) {
-	allJobs = jsonSlurper.parseText(apiCall("http://" + host + ":" + port + "/api/json?tree=jobs[name,displayName,url,color,lastBuild[number,duration,timestamp]]"))
-
-	failed = allJobs.jobs.findAll {it.color=="red" && (it.lastBuild.duration + it.lastBuild.timestamp >= ts)}
-
-	println ("There are " + failed.size() + " recently (1hr) failed jobs")
-
-	if (failed.size() > 0) {
-
-		failed.each { 
-			
-			Date t = Date.from(Instant.ofEpochSecond((long)((it.lastBuild.timestamp + it.lastBuild.duration) / 1000)))
-			showFailed(it.displayName, it.name, t.toString())
-		}
-		
-	}
-
-	sleep (120000)
-	ts = java.lang.System.currentTimeMillis()
+    allJobs = jsonSlurper.parseText(apiCall(jenkinsURL + "/api/json?tree=jobs[name,displayName,url,color,lastBuild[number,duration,timestamp]]"))
+    failed = allJobs.jobs.findAll {it.color=="red" && (it.lastBuild.duration + it.lastBuild.timestamp >= ts)}
+    println ("There are " + failed.size() + " recently (1hr) failed jobs")
+    failed.each { 
+      Date t = Date.from(Instant.ofEpochSecond((long)((it.lastBuild.timestamp + it.lastBuild.duration) / 1000)))
+      showFailed(it.displayName, it.url, t.toString())
+    }
+    sleep (120000)
+    ts = java.lang.System.currentTimeMillis()
 }
