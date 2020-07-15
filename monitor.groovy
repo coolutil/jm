@@ -107,6 +107,7 @@ while (true) {
       Date t = Date.from(Instant.ofEpochSecond((long)((it.lastBuild.timestamp + it.lastBuild.duration) / 1000)))
       showFailed(it.displayName, it.url, t.toString())
     }
-    sleep (120000)
-    ts = java.lang.System.currentTimeMillis()
+	ts = java.lang.System.currentTimeMillis()
+    sleep (60000)
+   
 }
