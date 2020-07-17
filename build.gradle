@@ -1,0 +1,16 @@
+apply plugin: 'groovy'
+apply plugin: 'application'
+mainClassName = "Monitor"
+archivesBaseName = 'Monitor';
+configurations {provided;  inlib;}
+repositories {mavenCentral()}
+dependencies {compile 'org.codehaus.groovy:groovy-all:3.0.0'}
+
+task uberjar(type: Jar,dependsOn:[':compileJava',':compileGroovy']) {
+    from files(sourceSets.main.output.classesDirs)
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
